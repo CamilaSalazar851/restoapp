@@ -1,0 +1,75 @@
+/* styles.css — estilos compartidos por toda la aplicación.
+   Se mantiene el mismo aspecto visual del proyecto original;
+   solo se centraliza aquí en vez de repetirse en cada página. */
+
+body {
+    font-family: sans-serif;
+}
+
+.contenedor-principal {
+    width: 400px;
+    margin: auto;
+    padding-top: 50px;
+}
+
+nav.nav-principal {
+    margin-bottom: 20px;
+}
+
+nav.nav-principal a {
+    margin-right: 12px;
+}
+
+#form,
+#form-pedido {
+    border: 1px solid #000;
+    padding: 20px;
+}
+
+.item {
+    margin-bottom: 10px;
+}
+
+#btn,
+button[type="submit"] {
+    background-color: green;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+}
+
+#res,
+#resultadoPedido {
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+#auth {
+    margin-top: 20px;
+    border: 1px dashed #ccc;
+    padding: 10px;
+}
+
+#productForm,
+#form-producto-contenedor {
+    margin-top: 20px;
+    border: 1px solid #ddd;
+    padding: 10px;
+}
+
+[data-tipo="error"] {
+    color: darkred;
+}
+
+[data-tipo="exito"] {
+    color: green;
+}
+
+#listaMenu {
+    padding-left: 20px;
+}
+
+#listaMenu li {
+    margin-bottom: 6px;
+}

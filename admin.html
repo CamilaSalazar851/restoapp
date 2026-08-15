@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>RestoApp - Administración</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="contenedor-principal">
+    <h2>RestoApp - Administración</h2>
+
+    <nav class="nav-principal">
+        <a href="index.html">Inicio</a>
+        <a href="menu.html">Ver menú</a>
+        <a href="pedidos.html">Tomar pedido</a>
+    </nav>
+
+    <button id="logoutBtn" type="button">Cerrar sesión</button>
+
+    <div id="form-producto-contenedor">
+        <h3>Crear producto</h3>
+        <form id="form-producto">
+            <div class="item">
+                Nombre: <input type="text" id="newName">
+            </div>
+            <div class="item">
+                Precio: <input type="number" id="newPrice" min="0">
+            </div>
+            <button id="btn" type="submit">Crear</button>
+        </form>
+        <div id="prodMsg"></div>
+    </div>
+</div>
+
+<script type="module" src="js/main-admin.js"></script>
+</body>
+</html>

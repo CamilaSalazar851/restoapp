@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>RestoApp - Iniciar sesión</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="contenedor-principal">
+    <h2>RestoApp - Acceso al sistema</h2>
+
+    <nav class="nav-principal">
+        <a href="index.html">Inicio</a>
+        <a href="menu.html">Ver menú</a>
+        <a href="pedidos.html">Tomar pedido</a>
+    </nav>
+
+    <form id="form-login" class="item">
+        <div class="item">
+            Usuario: <input type="text" id="user" autocomplete="username">
+        </div>
+        <div class="item">
+            Contraseña: <input type="password" id="pass" autocomplete="current-password">
+        </div>
+        <button id="btn" type="submit">Ingresar</button>
+        <div id="authMsg" style="margin-top:8px;"></div>
+    </form>
+</div>
+
+<script type="module" src="js/main-login.js"></script>
+</body>
+</html>
