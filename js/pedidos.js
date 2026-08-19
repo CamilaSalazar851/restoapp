@@ -1,9 +1,11 @@
 // pedidos.js
 // Gestión de pedidos: crear, listar, actualizar estado, eliminar.
+// Conexión completa con Firebase Realtime Database.
 
 import { obtenerDatos, guardarDatos, actualizarDatos, eliminarDatos, suscribirseADatos } from "./firebase.js";
 
 const NODO_PEDIDOS = "pedidos";
+const IVA = 0.19;
 
 /**
  * Normaliza datos de pedidos (pueden venir como array u objeto)
@@ -46,6 +48,35 @@ function normalizarPedidos(datos) {
     }
 
     return pedidos;
+}
+
+/**
+ * Calcula un pedido individual (para cada plato)
+ */
+function calcularPedido(platoId, cantidad, precioUnitario) {
+    if (!platoId) {
+        throw new Error("Debes seleccionar un plato.");
+    }
+    if (!Number.isFinite(cantidad) || cantidad <= 0) {
+        throw new Error("La cantidad debe ser un número mayor que cero.");
+    }
+    if (!Number.isFinite(precioUnitario) || precioUnitario < 0) {
+        throw new Error("El precio unitario no es válido.");
+    }
+
+    const subtotal = cantidad * precioUnitario;
+    const impuesto = subtotal * IVA;
+    const total = subtotal + impuesto;
+
+    return { platoId, cantidad, precioUnitario, subtotal, impuesto, total };
+}
+
+/**
+ * Formatea un pedido para mostrar
+ */
+function formatearPedido(pedido) {
+    return `Pedido: ${pedido.platoId} | Subtotal: $${pedido.subtotal.toFixed(2)} | `
+        + `IVA: $${pedido.impuesto.toFixed(2)} | Total: $${pedido.total.toFixed(2)}`;
 }
 
 /**
@@ -112,7 +143,7 @@ async function crearPedido(datosPedido) {
         }
     });
 
-    // Calcular total
+    // Calcular total (sin IVA por ahora, pero disponible)
     const total = platos.reduce((sum, plato) => sum + (plato.precio * plato.cantidad), 0);
 
     const nuevoPedido = {
@@ -186,6 +217,12 @@ function suscribirse(callback, intervalo = 1000) {
 }
 
 export { 
+    // Cálculos locales (sin persistencia)
+    calcularPedido,
+    formatearPedido,
+    IVA,
+    
+    // Operaciones con Firebase
     obtenerPedidos,
     obtenerPedido,
     crearPedido,
