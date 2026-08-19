@@ -1,6 +1,6 @@
 // main-pedidos.js — conecta el formulario de pedidos.html con menu.js y pedidos.js
 import { obtenerMenu } from "./menu.js";
-import { calcularPedido, formatearPedido } from "./pedidos.js";
+import { calcularPedido, crearPedido, formatearPedido } from "./pedidos.js";
 import { mostrarMensaje, limpiarFormulario } from "./ui.js";
 
 let precioPorPlato = {};
@@ -34,17 +34,23 @@ document.getElementById("plato").addEventListener("change", (evento) => {
     }
 });
 
-document.getElementById("form-pedido").addEventListener("submit", (evento) => {
+document.getElementById("form-pedido").addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
-    const plato = document.getElementById("plato").value;
+    const mesa = document.getElementById("mesa").value;
+    const platoId = document.getElementById("plato").value;
+    const nombrePlato = document.getElementById("plato").selectedOptions[0]?.textContent || platoId;
     const cantidad = Number(document.getElementById("cantidad").value);
     const precio = Number(document.getElementById("precio").value);
 
     try {
-        const pedido = calcularPedido(plato, cantidad, precio);
-        mostrarMensaje("resultadoPedido", formatearPedido(pedido), "exito");
-        limpiarFormulario("plato", "cantidad", "precio");
+        const pedido = calcularPedido(platoId, cantidad, precio);
+        await crearPedido({
+            mesa,
+            platos: [{ id: platoId, nombre: nombrePlato, precio, cantidad }]
+        });
+        mostrarMensaje("resultadoPedido", formatearPedido(pedido) + " — guardado en Firebase.", "exito");
+        limpiarFormulario("mesa", "plato", "cantidad", "precio");
     } catch (error) {
         mostrarMensaje("resultadoPedido", error.message, "error");
     }
