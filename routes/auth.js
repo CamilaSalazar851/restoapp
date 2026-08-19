@@ -1,10 +1,22 @@
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Registro de admin (usa solo si quieres crear admin vía API; protégelo)
+const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
+const ADMIN_CREATE_KEY = process.env.ADMIN_CREATE_KEY || null;
+
+function signToken(user) {
+  const payload = { id: user._id, role: user.role, email: user.email, name: user.name };
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
+}
+
+// Registro de admin (protegido por ADMIN_CREATE_KEY header 'x-admin-key')
 router.post('/register-admin', async (req, res) => {
   try {
+    if (!ADMIN_CREATE_KEY || req.headers['x-admin-key'] !== ADMIN_CREATE_KEY) {
+      return res.status(403).json({ message: 'Ruta de creación de admin protegida' });
+    }
     const { name, email, password } = req.body;
     if (!name || !email || !password) return res.status(400).json({ message: 'Faltan datos' });
     const exists = await User.findOne({ email: email.toLowerCase() });
@@ -36,7 +48,7 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login simple (devuelve info mínima)
+// Login - devuelve JWT
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -46,8 +58,36 @@ router.post('/login', async (req, res) => {
     const match = await user.comparePassword(password);
     if (!match) return res.status(401).json({ message: 'Credenciales inválidas' });
 
-    // Aquí puedes generar un JWT y devolverlo
-    res.json({ message: 'Login ok', user: { id: user._id, email: user.email, role: user.role, name: user.name } });
+    const token = signToken(user);
+    res.json({ message: 'Login ok', token, user: { id: user._id, email: user.email, role: user.role, name: user.name } });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error del servidor' });
+  }
+});
+
+// Middleware para verificar JWT
+function requireAuth(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth) return res.status(401).json({ message: 'No autorizado' });
+  const parts = auth.split(' ');
+  if (parts.length !== 2 || parts[0] !== 'Bearer') return res.status(401).json({ message: 'Formato de token inválido' });
+  const token = parts[1];
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+}
+
+// Obtener datos del usuario logeado
+router.get('/me', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+    res.json({ user });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error del servidor' });

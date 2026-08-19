@@ -1,21 +1,35 @@
-// main-login.js — conecta el formulario de login.html con auth.js
-import { iniciarSesion, estaAutenticado } from "./auth.js";
-import { mostrarMensaje } from "./ui.js";
+// frontend login handler
+const form = document.getElementById('form-login');
+const userInput = document.getElementById('user');
+const passInput = document.getElementById('pass');
+const authMsg = document.getElementById('authMsg');
 
-// Si ya hay una sesión activa, no tiene sentido mostrar el login de nuevo.
-if (estaAutenticado()) {
-    window.location.href = "admin.html";
-}
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  authMsg.textContent = '';
+  const email = userInput.value.trim();
+  const password = passInput.value;
+  if (!email || !password) { authMsg.textContent = 'Completa ambos campos'; return; }
 
-document.getElementById("form-login").addEventListener("submit", (evento) => {
-    evento.preventDefault();
-
-    const usuario = document.getElementById("user").value;
-    const clave = document.getElementById("pass").value;
-
-    if (iniciarSesion(usuario, clave)) {
-        window.location.href = "admin.html";
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { authMsg.textContent = data.message || 'Error'; return; }
+    // Guarda token
+    if (data.token) localStorage.setItem('token', data.token);
+    // Redirige según role
+    const role = data.user && data.user.role;
+    if (role === 'admin') {
+      window.location.href = 'admin.html';
     } else {
-        mostrarMensaje("authMsg", "Credenciales inválidas", "error");
+      window.location.href = 'index.html';
     }
+  } catch (err) {
+    console.error(err);
+    authMsg.textContent = 'Error de conexión';
+  }
 });
